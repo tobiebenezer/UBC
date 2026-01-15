@@ -1,5 +1,5 @@
 import React from 'react';
-import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet, useLocation, createMemoryHistory, Link } from '@tanstack/react-router';
+import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet, useLocation, createBrowserHistory, Link } from '@tanstack/react-router';
 import { Home as HomeIcon } from 'lucide-react';
 import Layout from './components/Layout';
 import Home from './pages/Home';
@@ -199,15 +199,13 @@ const routeTree = rootRoute.addChildren([
   dashboardRoute
 ]);
 
-// Use memory history to completely avoid browser history API restrictions in sandboxed environments
-const memoryHistory = createMemoryHistory({
-  initialEntries: ['/'],
-});
+// Use browser history to properly handle direct URL navigation
+const browserHistory = createBrowserHistory();
 
 // Create Router
 const router = createRouter({ 
   routeTree,
-  history: memoryHistory,
+  history: browserHistory,
   defaultPreload: false, // Disable preloading to avoid triggering security errors on link interactions
 } as any);
 

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>United Baptist Church</title>
+    <script>
+      // Polyfill to prevent "The operation is insecure" error in strict sandboxed environments
+      try {
+        window.localStorage;
+        window.sessionStorage;
+      } catch (e) {
+        console.warn('Storage access restricted, using memory polyfill');
+        const memoryStorage = {
+          _data: {},
+          getItem(key) { return this._data[key] || null; },
+          setItem(key, value) { this._data[key] = String(value); },
+          removeItem(key) { delete this._data[key]; },
+          clear() { this._data = {}; },
+          key(i) { return Object.keys(this._data)[i] || null; },
+          get length() { return Object.keys(this._data).length; }
+        };
+        try {
+          Object.defineProperty(window, 'localStorage', { value: memoryStorage, configurable: true, writable: true });
+          Object.defineProperty(window, 'sessionStorage', { value: memoryStorage, configurable: true, writable: true });
+        } catch(err) {
+          console.warn('Could not polyfill storage', err);
+        }
+      }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Lato', 'sans-serif'],
+              serif: ['Playfair Display', 'serif'],
+            },
+            colors: {
+              church: {
+                primary: '#0B2545', // Brand Navy
+                gold: '#C5A059',    // Muted Metallic Gold (More elegant than yellow)
+                cyan: '#335C67',    // Muted Slate/Teal (Classier than neon cyan)
+                red: '#9F1239',     // Deep Burgundy (Classier than bright red)
+                cream: '#F4F2EE',   // Warm Paper White
+                black: '#1a1a1a',   // Logo Black
+              }
+            },
+            animation: {
+              'fade-in-up': 'fadeInUp 1s ease-out forwards',
+              'slow-zoom': 'slowZoom 20s linear infinite alternate',
+            },
+            keyframes: {
+              fadeInUp: {
+                '0%': { opacity: '0', transform: 'translateY(20px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' },
+              },
+              slowZoom: {
+                '0%': { transform: 'scale(1)' },
+                '100%': { transform: 'scale(1.15)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #F4F2EE;
+        color: #0B2545;
+      }
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+    "@tanstack/react-router": "https://esm.sh/@tanstack/react-router@^1.149.3"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

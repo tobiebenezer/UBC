@@ -1,25 +1,46 @@
+
 import React, { useState } from 'react';
-import { ArrowRight, User, Lock, Loader2 } from 'lucide-react';
+import { ArrowRight, User, Lock, Loader2, AlertCircle } from 'lucide-react';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { supabase } from '../lib/supabaseClient';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // Simulate API call
-    setTimeout(() => {
-      localStorage.setItem('user_token', 'mock_token_123');
-      // Dispatch event so Layout updates immediately
-      window.dispatchEvent(new Event('auth-change'));
+    try {
+      if (supabase) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+        // Navigation is handled by auth state change in Layout, but we can force it
+        navigate({ to: '/dashboard' });
+      } else {
+        // Fallback for demo mode
+        if (email && password) {
+            localStorage.setItem('mock_token', 'mock_token_123');
+            window.dispatchEvent(new Event('auth-change'));
+            navigate({ to: '/dashboard' });
+        } else {
+            setError("Please enter valid credentials.");
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in');
+    } finally {
       setIsLoading(false);
-      navigate({ to: '/dashboard' });
-    }, 1500);
+    }
   };
 
   return (
@@ -39,6 +60,12 @@ const Login: React.FC = () => {
             <h1 className="font-serif text-3xl text-church-primary mb-2">Member Portal</h1>
             <p className="text-gray-400 text-sm">Welcome back to the community.</p>
          </div>
+
+         {error && (
+            <div className="mb-6 bg-red-50 text-red-600 p-4 rounded-xl flex items-center gap-3 text-sm">
+                <AlertCircle size={16} /> {error}
+            </div>
+         )}
 
          <form onSubmit={handleLogin} className="space-y-6">
             <div className="relative">

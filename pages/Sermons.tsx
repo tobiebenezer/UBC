@@ -1,30 +1,71 @@
-import React, { useState } from 'react';
-import { Play, Search, ArrowRight, Layers, X } from 'lucide-react';
+
+import React, { useState, useEffect } from 'react';
+import { Play, Search, ArrowRight, Layers, X, Loader2 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { sermonsData, seriesData } from '../data';
+import { supabase } from '../lib/supabaseClient';
+import { Sermon, Series } from '../types';
 
 const Sermons: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSeriesId, setSelectedSeriesId] = useState<string | null>(null);
+  const [sermons, setSermons] = useState<Sermon[]>([]);
+  const [seriesList, setSeriesList] = useState<Series[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const featuredSermon = sermonsData[0];
+  useEffect(() => {
+    const fetchData = async () => {
+      if (supabase) {
+        const { data: sermonsDB, error: sErr } = await supabase
+          .from('sermons')
+          .select('*')
+          .order('date', { ascending: false });
+        
+        const { data: seriesDB, error: serErr } = await supabase
+          .from('series')
+          .select('*');
 
-  const filteredSermons = sermonsData.filter(sermon => {
+        if (sermonsDB && !sErr) setSermons(sermonsDB as unknown as Sermon[]);
+        else setSermons(sermonsData);
+
+        if (seriesDB && !serErr) setSeriesList(seriesDB as unknown as Series[]);
+        else setSeriesList(seriesData);
+      } else {
+        setSermons(sermonsData);
+        setSeriesList(seriesData);
+      }
+      setIsLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const featuredSermon = sermons.length > 0 ? sermons[0] : sermonsData[0];
+
+  const filteredSermons = sermons.filter(sermon => {
     const matchesSearch = 
       sermon.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       sermon.series.toLowerCase().includes(searchQuery.toLowerCase()) ||
       sermon.speaker.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const seriesTitle = selectedSeriesId ? seriesData.find(s => s.id === selectedSeriesId)?.title : null;
+    const seriesTitle = selectedSeriesId ? seriesList.find(s => s.id === selectedSeriesId)?.title : null;
     const matchesSeries = selectedSeriesId ? sermon.series === seriesTitle : true;
 
     return matchesSearch && matchesSeries;
   });
 
+  if (isLoading) {
+    return (
+      <div className="bg-church-primary min-h-screen w-full flex items-center justify-center">
+        <Loader2 className="animate-spin text-church-gold" size={48} />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-church-primary min-h-screen w-full text-white pt-24 pb-20">
       
       {/* Featured Header - Cinematic */}
+      {featuredSermon && (
       <div className="px-6 container mx-auto mb-24 relative z-10">
         <Link to={`/sermons/${featuredSermon.id}`} className="block relative w-full h-[60vh] md:h-[70vh] rounded-[3rem] overflow-hidden shadow-2xl group cursor-pointer border border-white/10">
            <img 
@@ -53,6 +94,7 @@ const Sermons: React.FC = () => {
           </div>
         </Link>
       </div>
+      )}
 
       {/* Series Browser - Poster Style */}
       <div className="container mx-auto pl-6 mb-24 overflow-hidden">
@@ -66,7 +108,7 @@ const Sermons: React.FC = () => {
          </div>
          
          <div className="flex gap-6 overflow-x-auto pb-12 pr-6 hide-scrollbar snap-x">
-            {seriesData.map(series => (
+            {seriesList.map(series => (
                <button 
                   key={series.id}
                   onClick={() => setSelectedSeriesId(selectedSeriesId === series.id ? null : series.id)}
@@ -88,7 +130,7 @@ const Sermons: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8 border-b border-white/10 pb-8">
            <div>
               <h3 className="font-serif text-4xl text-white mb-2">
-                 {selectedSeriesId ? seriesData.find(s => s.id === selectedSeriesId)?.title : "All Sermons"}
+                 {selectedSeriesId ? seriesList.find(s => s.id === selectedSeriesId)?.title : "All Sermons"}
               </h3>
               <p className="text-white/40 text-sm">{filteredSermons.length} messages available</p>
            </div>

@@ -13,7 +13,8 @@
     "react-dom": "^19.2.3",
     "lucide-react": "^0.562.0",
     "@google/genai": "^1.35.0",
-    "@tanstack/react-router": "^1.149.3"
+    "@tanstack/react-router": "^1.149.3",
+    "@supabase/supabase-js": "^2.90.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -1,9 +1,44 @@
-import React from 'react';
-import { Clock, MapPin, ArrowRight } from 'lucide-react';
+
+import React, { useState, useEffect } from 'react';
+import { Clock, MapPin, ArrowRight, Loader2 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import { eventsData } from '../data';
+import { supabase } from '../lib/supabaseClient';
+import { Event } from '../types';
 
 const Events: React.FC = () => {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (supabase) {
+        const { data, error } = await supabase
+          .from('events')
+          .select('*')
+          .order('date', { ascending: true }); // Assuming date format allows sorting, or use a proper timestamp field
+
+        if (data && !error) {
+           setEvents(data as unknown as Event[]);
+        } else {
+           setEvents(eventsData);
+        }
+      } else {
+        setEvents(eventsData);
+      }
+      setIsLoading(false);
+    };
+    fetchEvents();
+  }, []);
+
+  if (isLoading) {
+    return (
+       <div className="min-h-screen pt-40 pb-20 bg-[#fbfaf8] flex items-center justify-center">
+          <Loader2 className="animate-spin text-church-primary" size={32} />
+       </div>
+    );
+  }
+
   return (
     <div className="bg-[#fbfaf8] min-h-screen pt-40 pb-20 px-6">
       
@@ -20,7 +55,7 @@ const Events: React.FC = () => {
 
       {/* Events List - Typography Focused */}
       <div className="container mx-auto max-w-6xl space-y-16">
-        {eventsData.map((event, index) => (
+        {events.map((event, index) => (
           <Link key={index} to={`/events/${event.id}`} className="group block">
              <div className="relative bg-white rounded-[3rem] p-10 md:p-14 shadow-sm border border-gray-100 hover:shadow-2xl transition-all duration-500 overflow-hidden">
                 <div className="flex flex-col md:flex-row gap-12 items-start relative z-10">

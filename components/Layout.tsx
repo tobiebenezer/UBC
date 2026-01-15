@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
-import { Menu, X, Facebook, Instagram, Youtube, Phone, User, LogOut, LayoutDashboard, Settings, ChevronDown, Clock, MapPin, Heart, Search } from 'lucide-react';
+import { Menu, X, LogOut, LayoutDashboard, Heart, Search, ChevronDown, Clock, MapPin, Facebook, Instagram, Youtube } from 'lucide-react';
 import { NavItem } from '../types';
 import GeminiAssistant from './GeminiAssistant';
 import SearchOverlay from './SearchOverlay';
+import { supabase } from '../lib/supabaseClient';
 
 const navItems: NavItem[] = [
   { label: 'Home', path: '/' },
@@ -38,17 +40,11 @@ const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Helper to determine if the current page starts with a Dark Hero section
-  // (Requires White Text initially)
   const hasDarkHero = () => {
     const p = location.pathname;
-    
-    if (p === '/' || p === '/sermons' || p === '/groups' || p === '/about') return true;
-    
-    if (p.startsWith('/ministries/')) return true;
-    if (p.startsWith('/events/')) return true; 
-    if (p.startsWith('/sermons/')) return false; 
-    
+    // About page has a light background, so we exclude it here to ensure dark text
+    if (p === '/' || p === '/sermons' || p === '/groups') return true;
+    if (p.startsWith('/ministries/') || p.startsWith('/events/')) return true;
     return false;
   };
 
@@ -59,26 +55,42 @@ const Header: React.FC = () => {
   };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const user = localStorage.getItem('user_token');
-      setIsLoggedIn(!!user);
-    };
-    
-    checkAuth();
-    window.addEventListener('auth-change', checkAuth);
-    
-    const handleScroll = () => {
-      try {
-        setIsScrolled(window.scrollY > 50);
-      } catch (e) {
-        setIsScrolled(true); 
+    // Check initial session
+    const checkSession = async () => {
+      if (supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsLoggedIn(!!session);
+      } else {
+        // Fallback for demo without Supabase keys
+        setIsLoggedIn(!!localStorage.getItem('mock_token'));
       }
     };
+    checkSession();
+
+    // Listen for auth changes
+    let subscription: any = null;
+    let handleMockAuth: (() => void) | null = null;
+
+    if (supabase) {
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        setIsLoggedIn(!!session);
+      });
+      subscription = data.subscription;
+    } else {
+      // Fallback listener for mock auth
+      handleMockAuth = () => setIsLoggedIn(!!localStorage.getItem('mock_token'));
+      window.addEventListener('auth-change', handleMockAuth);
+    }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
     window.addEventListener('scroll', handleScroll);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('auth-change', checkAuth);
+      if (subscription) subscription.unsubscribe();
+      if (handleMockAuth) window.removeEventListener('auth-change', handleMockAuth);
     };
   }, []);
 
@@ -87,327 +99,122 @@ const Header: React.FC = () => {
     setIsProfileOpen(false);
   }, [location.pathname]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user_token');
-    window.dispatchEvent(new Event('auth-change'));
+  const handleLogout = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+    } else {
+      localStorage.removeItem('mock_token');
+      window.dispatchEvent(new Event('auth-change'));
+    }
     navigate({ to: '/' });
   };
 
   const isFilledState = isScrolled || forceFilledHeader();
-  
-  let isDarkText = false;
-
-  if (isMobileMenuOpen) {
-    isDarkText = false; 
-  } else if (isFilledState) {
-    isDarkText = false; 
-  } else if (hasDarkHero()) {
-    isDarkText = false; 
-  } else {
-    isDarkText = true; 
-  }
+  const isDarkText = !isMobileMenuOpen && !isFilledState && !hasDarkHero();
 
   return (
     <>
-    <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-    
-    <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center pointer-events-none">
+      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       
-      {/* Top Utility Bar - Fades out on scroll */}
-      <div 
-        className={`w-full bg-church-primary text-white transition-all duration-500 overflow-hidden flex justify-center pointer-events-auto ${
-          isFilledState ? 'h-0 opacity-0' : 'h-10 opacity-100'
-        }`}
-      >
-        <div className="w-full max-w-[90rem] px-6 lg:px-12 flex justify-between items-center h-full text-[10px] font-bold uppercase tracking-[0.15em]">
-           <div className="flex items-center gap-6">
+      <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center pointer-events-none">
+        {/* Top Utility Bar */}
+        <div className={`w-full bg-church-primary text-white transition-all duration-500 overflow-hidden flex justify-center pointer-events-auto ${isFilledState ? 'h-0 opacity-0' : 'h-10 opacity-100'}`}>
+          <div className="w-full max-w-[90rem] px-6 lg:px-12 flex justify-between items-center h-full text-[10px] font-bold uppercase tracking-[0.15em]">
+            <div className="flex items-center gap-6">
               <span className="flex items-center gap-2 text-white/90">
                 <Clock size={12} className="text-church-gold" /> Sundays 9:00 AM & 11:00 AM
               </span>
               <span className="hidden md:flex items-center gap-2 text-white/90">
                 <MapPin size={12} className="text-church-gold" /> 39/37 Tafawa Balewa Street, Jos
               </span>
-           </div>
-           <div className="flex items-center gap-6">
-              <Link to="/sermons" className="hover:text-church-gold transition-colors flex items-center gap-2">
-                 Watch Live <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
-              </Link>
-           </div>
+            </div>
+            <Link to="/sermons" className="hover:text-church-gold transition-colors flex items-center gap-2">
+              Watch Live <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+            </Link>
+          </div>
         </div>
+
+        {/* Main Header */}
+        <header className={`w-full flex justify-center transition-all duration-500 pointer-events-auto ${isFilledState ? 'pt-4' : 'pt-6'}`}>
+          <div className={`relative flex items-center justify-between transition-all duration-500 ${isFilledState ? 'w-[95%] max-w-7xl bg-church-primary/95 backdrop-blur-xl shadow-2xl rounded-full px-5 lg:px-8 py-3 border border-white/10' : 'w-full px-6 lg:px-12 py-4 bg-transparent'}`}>
+            <Link to="/" className="flex items-center z-50 group flex-shrink-0">
+               {/* Logo: U with Red Cross - Transparent Background */}
+               <div className="w-12 h-12 lg:w-14 lg:h-14 mr-3 flex items-center justify-center relative">
+                  <svg viewBox="0 0 100 100" className="w-12 h-12 lg:w-14 lg:h-14">
+                    {/* The U Shape - Color adapts to background */}
+                    <path d="M25 20 V 60 C 25 80 75 80 75 60 V 20" stroke={isDarkText ? "#0B2545" : "#FFFFFF"} strokeWidth="12" fill="none" strokeLinecap="round" />
+                    {/* The Red Cross - Moved Up */}
+                    <path d="M50 25 V 65" stroke="#DC2626" strokeWidth="10" strokeLinecap="round" />
+                    <path d="M30 40 H 70" stroke="#DC2626" strokeWidth="10" strokeLinecap="round" />
+                  </svg>
+               </div>
+               <div className="flex flex-col items-start">
+                 <span className={`font-serif text-lg lg:text-2xl font-bold tracking-tight leading-none transition-colors duration-300 ${isDarkText ? 'text-church-primary' : 'text-white'}`}>United Baptist</span>
+                 <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-church-gold">Church, Jos</span>
+               </div>
+            </Link>
+
+            <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
+              {navItems.filter(i => i.path !== '/').map((item, idx) => (
+                item.children ? (
+                  <div key={idx} className="relative group px-1">
+                    <button className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-bold tracking-[0.15em] uppercase transition-all duration-300 whitespace-nowrap ${isDarkText ? 'text-church-primary' : 'text-white/90'}`}>
+                      {item.label} <ChevronDown size={10} className="group-hover:rotate-180 transition-transform opacity-70" />
+                    </button>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto min-w-[12rem]">
+                      <div className="bg-white rounded-2xl shadow-2xl py-2 border border-gray-100">
+                        {item.children.map((child, cIdx) => (
+                          <Link key={cIdx} to={child.path!} className="block px-6 py-3 text-xs text-gray-600 hover:text-church-primary hover:bg-church-cream font-bold uppercase tracking-wider">{child.label}</Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Link key={item.path} to={item.path!} className={`px-3 py-2 text-[11px] font-bold tracking-[0.15em] uppercase transition-all duration-300 ${isDarkText ? 'text-church-primary/70 hover:text-church-primary' : 'text-white/80 hover:text-white'}`}>{item.label}</Link>
+                )
+              ))}
+            </nav>
+
+            <div className="hidden lg:flex items-center gap-3">
+              <button onClick={() => setIsSearchOpen(true)} className={`w-10 h-10 flex items-center justify-center rounded-full ${isDarkText ? 'text-church-primary hover:bg-church-cream' : 'text-white hover:bg-white/10'}`}><Search size={18} /></button>
+              {!isLoggedIn ? (
+                <>
+                  <Link to="/visit" className={`px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase border ${isDarkText ? 'border-church-primary text-church-primary hover:bg-church-primary hover:text-white' : 'border-white/30 text-white hover:bg-white hover:text-church-primary'}`}>Plan A Visit</Link>
+                </>
+              ) : (
+                <div className="relative">
+                  <button onClick={() => setIsProfileOpen(!isProfileOpen)} className={`flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full border ${isDarkText ? 'border-gray-200 bg-gray-50' : 'border-white/20 bg-white/10 text-white'}`}>
+                    <div className="w-8 h-8 rounded-full bg-church-gold text-church-primary flex items-center justify-center font-bold font-serif">S</div>
+                    <span className="text-xs font-bold uppercase">Sarah</span>
+                  </button>
+                  {isProfileOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl py-2 border border-gray-100 animate-fade-in-up">
+                      <Link to="/dashboard" className="flex items-center gap-3 px-6 py-3 text-sm text-church-primary hover:bg-church-cream transition-colors"><LayoutDashboard size={16} className="text-church-gold" /> Dashboard</Link>
+                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-6 py-3 text-sm text-red-500 hover:bg-red-50 text-left"><LogOut size={16} /> Sign Out</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 lg:hidden">
+              <button onClick={() => setIsSearchOpen(true)} className={`p-2 ${isDarkText ? 'text-church-primary' : 'text-white'}`}><Search size={24} /></button>
+              <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`z-50 p-2 ${isDarkText ? 'text-church-primary' : 'text-white'}`}>{isMobileMenuOpen ? <X size={24} className="text-white" /> : <Menu size={24} />}</button>
+            </div>
+          </div>
+        </header>
       </div>
 
-      {/* Main Header Container */}
-      <header 
-        className={`w-full flex justify-center transition-all duration-500 pointer-events-auto ${
-          isFilledState ? 'pt-4' : 'pt-6'
-        }`}
-      >
-        <div 
-          className={`
-            relative flex items-center justify-between transition-all duration-500
-            ${isFilledState 
-              ? 'w-[95%] max-w-7xl bg-church-primary/95 backdrop-blur-xl shadow-2xl shadow-church-primary/30 rounded-full px-5 lg:px-8 py-3 border border-white/10' 
-              : 'w-full px-6 lg:px-12 py-4 bg-transparent'
-            }
-          `}
-        >
-          {/* Logo */}
-          <Link to="/" className="flex items-center z-50 group flex-shrink-0 mr-4 lg:mr-0">
-             <img 
-               src="/logo.png" 
-               alt="United Baptist Church Logo" 
-               className={`w-10 h-10 lg:w-12 lg:h-12 mr-3 object-contain transition-all duration-300 ${!isDarkText ? 'brightness-0 invert' : ''}`}
-               onError={(e) => {
-                 e.currentTarget.style.display = 'none';
-                 e.currentTarget.nextElementSibling?.classList.remove('hidden');
-               }}
-             />
-             
-             <div className="hidden relative w-8 h-10 mr-3 flex-shrink-0">
-                <div className={`absolute inset-0 border-l-[6px] border-r-[6px] border-b-[6px] rounded-b-2xl h-full w-full transition-colors duration-300 ${isDarkText ? 'border-church-primary' : 'border-white'}`}></div>
-                <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[4px] h-5 bg-church-red"></div>
-                <div className="absolute top-3.5 left-1/2 -translate-x-1/2 w-3.5 h-[4px] bg-church-red"></div>
-             </div>
-             
-             <div className="flex flex-col items-start">
-               <span className={`font-serif text-lg lg:text-2xl font-bold tracking-tight leading-none transition-colors duration-300 ${isDarkText ? 'text-church-primary' : 'text-white'}`}>
-                 United Baptist
-               </span>
-               <div className="flex items-center gap-2 mt-0.5">
-                 <span className={`text-[0.6rem] font-bold uppercase tracking-[0.2em] text-church-gold`}>
-                   Church, Jos
-                 </span>
-               </div>
-             </div>
-          </Link>
-
-          {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
-            {navItems.filter(item => item.path !== '/').map((item, idx) => {
-              if (item.children) {
-                return (
-                  <div key={idx} className="relative group px-1">
-                     <button className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-[11px] font-bold tracking-[0.15em] uppercase transition-all duration-300 whitespace-nowrap ${
-                       isDarkText 
-                         ? 'text-church-primary hover:text-church-gold' 
-                         : 'text-white/90 hover:text-white'
-                     }`}>
-                       {item.label} <ChevronDown size={10} className="group-hover:rotate-180 transition-transform duration-300 opacity-70" />
-                     </button>
-                     
-                     <div className="absolute top-full left-1/2 -translate-x-1/2 pt-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-4 pointer-events-none group-hover:pointer-events-auto min-w-[12rem]">
-                        <div className="bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] overflow-hidden py-2 border border-white/50 ring-1 ring-black/5">
-                           <div className="absolute top-0 left-0 w-full h-1 bg-church-gold"></div>
-                           {item.children.map((child, cIdx) => (
-                              <Link 
-                                key={cIdx} 
-                                to={child.path!} 
-                                className="block px-6 py-3 text-xs text-gray-600 hover:text-church-primary hover:bg-church-gold/10 transition-colors font-bold uppercase tracking-wider text-left"
-                              >
-                                {child.label}
-                              </Link>
-                           ))}
-                        </div>
-                     </div>
-                  </div>
-                );
-              }
-              
-              return (
-                <Link 
-                  key={item.path} 
-                  to={item.path!} 
-                  className={`
-                    px-3 py-2 rounded-full text-[11px] font-bold tracking-[0.15em] uppercase transition-all duration-300 whitespace-nowrap relative group
-                    ${location.pathname === item.path 
-                      ? (isDarkText ? 'text-church-primary' : 'text-white') 
-                      : (isDarkText ? 'text-church-primary/70 hover:text-church-primary' : 'text-white/80 hover:text-white')
-                    }
-                  `}
-                >
-                  {item.label}
-                  <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-church-gold transition-all duration-300 group-hover:w-1/2 ${location.pathname === item.path ? 'w-1/2' : ''}`}></span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Action Button / User Profile */}
-          <div className="hidden lg:flex items-center gap-3 z-50 flex-shrink-0 ml-4 lg:ml-0">
-             
-             {/* Search Button */}
-             <button 
-                onClick={() => setIsSearchOpen(true)}
-                className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isDarkText ? 'text-church-primary hover:bg-church-cream' : 'text-white hover:bg-white/10'}`}
-                aria-label="Search"
-             >
-                <Search size={18} />
-             </button>
-
-             {!isLoggedIn ? (
-               <>
-                 <Link
-                  to="/visit"
-                  className={`
-                    px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all whitespace-nowrap border
-                    ${isDarkText 
-                      ? 'border-church-primary text-church-primary hover:bg-church-primary hover:text-white' 
-                      : 'border-white/30 text-white hover:bg-white hover:text-church-primary'}
-                  `}
-                >
-                  Plan A Visit
-                </Link>
-                 <Link
-                  to="/login"
-                  className={`
-                    flex items-center justify-center w-10 h-10 rounded-full transition-all border
-                    ${isDarkText 
-                      ? 'bg-transparent border-church-primary/20 text-church-primary hover:bg-church-gold hover:text-church-primary' 
-                      : 'bg-white/10 border-white/20 text-white hover:bg-white hover:text-church-primary backdrop-blur-sm'}
-                  `}
-                  title="Member Login"
-                >
-                  <User size={16} />
-                </Link>
-               </>
-             ) : (
-               <div className="relative">
-                 <button 
-                    onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className={`flex items-center gap-3 pl-2 pr-4 py-1.5 rounded-full border transition-all ${
-                      isDarkText 
-                      ? 'border-gray-200 bg-gray-50 hover:border-church-gold text-church-primary' 
-                      : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
-                    }`}
-                 >
-                    <div className="w-8 h-8 rounded-full bg-church-gold text-church-primary flex items-center justify-center font-bold font-serif">
-                       S
-                    </div>
-                    <span className="text-xs font-bold tracking-wider uppercase">Sarah</span>
-                 </button>
-
-                 {/* Dropdown */}
-                 {isProfileOpen && (
-                   <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden py-2 animate-fade-in-up">
-                      <Link to="/dashboard" className="flex items-center gap-3 px-6 py-3 text-sm text-church-primary hover:bg-church-cream transition-colors">
-                        <LayoutDashboard size={16} className="text-church-gold" /> Dashboard
-                      </Link>
-                      <Link to="/give" className="flex items-center gap-3 px-6 py-3 text-sm text-church-primary hover:bg-church-cream transition-colors">
-                         <Heart size={16} className="text-church-gold" /> My Giving
-                      </Link>
-                      <div className="h-px bg-gray-100 my-1"></div>
-                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-6 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors text-left">
-                        <LogOut size={16} /> Sign Out
-                      </button>
-                   </div>
-                 )}
-               </div>
-             )}
-          </div>
-
-          {/* Mobile Menu Toggle */}
-          <div className="flex items-center gap-2 lg:hidden">
-             <button
-               className={`p-2 transition-colors ${isDarkText ? 'text-church-primary' : 'text-white'}`}
-               onClick={() => setIsSearchOpen(true)}
-             >
-                <Search size={24} />
-             </button>
-             <button
-              className={`z-50 p-2 transition-colors ${isDarkText ? 'text-church-primary' : 'text-white'}`}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-             >
-               {isMobileMenuOpen 
-                 ? <X size={24} className="text-white" /> 
-                 : <Menu size={24} />
-               } 
-             </button>
-          </div>
+      {/* Mobile Menu */}
+      <div className={`fixed inset-0 bg-church-primary/95 backdrop-blur-xl z-40 flex flex-col justify-center items-center space-y-8 transition-all duration-700 pointer-events-auto ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none translate-y-8'}`}>
+        <div className="flex flex-col items-center space-y-6 w-full px-6 text-center">
+          {navItems.map((item, idx) => (
+             item.path !== '/' && (
+               <Link key={idx} to={item.path || '#'} onClick={() => setIsMobileMenuOpen(false)} className="font-serif text-4xl text-white hover:text-church-gold transition-colors">{item.label}</Link>
+             )
+          ))}
+          <Link to="/visit" onClick={() => setIsMobileMenuOpen(false)} className="w-full max-w-sm py-4 bg-church-gold text-church-primary rounded-full text-center font-bold uppercase tracking-widest mt-8">Plan A Visit</Link>
         </div>
-      </header>
-    </div>
-
-      {/* Mobile Nav Overlay - Premium Dark Glassmorphism */}
-      <div
-        className={`fixed inset-0 bg-church-primary/95 backdrop-blur-xl z-40 flex flex-col justify-center items-center space-y-8 transition-all duration-700 pointer-events-auto ${
-          isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none translate-y-8'
-        }`}
-      >
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-church-gold via-church-cyan to-church-gold"></div>
-        <div className="flex flex-col items-center space-y-6 max-h-[75vh] overflow-y-auto w-full px-6">
-          {navItems.map((item, idx) => {
-            if (item.path === '/') return null; 
-            
-            if (item.children) {
-              return (
-                <div key={idx} className="flex flex-col items-center w-full">
-                   <div className="w-12 h-px bg-white/10 mb-6 mt-4"></div>
-                   <span className="font-serif text-xl text-church-gold italic mb-4">{item.label}</span>
-                   <div className="flex flex-col gap-5 items-center">
-                     {item.children.map((child, cIdx) => (
-                        <Link
-                          key={cIdx}
-                          to={child.path!}
-                          className="font-serif text-3xl text-white hover:text-church-cyan transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
-                          {child.label}
-                        </Link>
-                     ))}
-                   </div>
-                   <div className="w-12 h-px bg-white/10 mt-8 mb-4"></div>
-                </div>
-              );
-            }
-
-            return (
-              <Link
-                key={item.path}
-                to={item.path!}
-                className="font-serif text-4xl text-white hover:text-church-cyan transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-
-          {isLoggedIn && (
-             <Link
-              to="/dashboard"
-              className="font-serif text-4xl text-church-gold hover:text-white transition-colors mt-4"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              My Dashboard
-            </Link>
-          )}
-        </div>
-
-        {!isLoggedIn ? (
-          <div className="flex flex-col gap-4 w-full px-12 max-w-sm">
-            <Link
-              to="/visit"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full py-4 bg-church-gold text-church-primary rounded-full text-sm font-bold tracking-widest uppercase shadow-xl text-center hover:bg-white transition-colors"
-            >
-              Plan A Visit
-            </Link>
-            <Link
-               to="/login"
-               onClick={() => setIsMobileMenuOpen(false)}
-               className="w-full py-4 border border-white/20 text-white rounded-full text-sm font-bold tracking-widest uppercase text-center hover:bg-white/10 transition-colors"
-            >
-              Member Login
-            </Link>
-          </div>
-        ) : (
-          <button
-             onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
-             className="px-10 py-4 border border-white/20 text-white rounded-full text-sm font-bold tracking-widest uppercase hover:bg-white/10 transition-colors"
-          >
-            Sign Out
-          </button>
-        )}
       </div>
     </>
   );
@@ -415,100 +222,56 @@ const Header: React.FC = () => {
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-church-primary text-white pt-32 pb-12 w-full relative overflow-hidden">
-      {/* Top Border Decor with Brand Colors */}
+    <footer className="bg-church-primary text-white pt-32 pb-12 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-church-gold via-church-cyan to-church-gold"></div>
-      
-      {/* Texture Overlay */}
-      <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-      
-      <div className="container mx-auto px-6 md:px-12 relative z-10">
+      <div className="container mx-auto px-6 relative z-10">
         <div className="flex flex-col lg:flex-row justify-between items-start mb-24 gap-16">
-          
           <div className="lg:w-1/3">
              <div className="flex items-center mb-6">
-                 {/* Image Logo - Always White for Footer (Dark Background) */}
-                <img 
-                   src="/logo.png" 
-                   alt="United Baptist Church Logo" 
-                   className="w-10 h-10 lg:w-12 lg:h-12 mr-3 object-contain brightness-0 invert"
-                   onError={(e) => {
-                     e.currentTarget.style.display = 'none';
-                     e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                   }}
-                 />
-                 
-                 {/* Fallback CSS Logo - Always White Border for Footer */}
-                 <div className="hidden relative w-8 h-10 mr-3 flex-shrink-0">
-                    <div className="absolute inset-0 border-l-[6px] border-r-[6px] border-b-[6px] border-white rounded-b-2xl h-full w-full"></div>
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[4px] h-5 bg-church-red"></div>
-                    <div className="absolute top-3.5 left-1/2 -translate-x-1/2 w-3.5 h-[4px] bg-church-red"></div>
-                 </div>
-
+                <div className="w-12 h-12 mr-3 flex items-center justify-center">
+                  <svg viewBox="0 0 100 100" className="w-12 h-12">
+                    <path d="M25 20 V 60 C 25 80 75 80 75 60 V 20" stroke="#FFFFFF" strokeWidth="12" fill="none" strokeLinecap="round" />
+                    <path d="M50 25 V 65" stroke="#DC2626" strokeWidth="10" strokeLinecap="round" />
+                    <path d="M30 40 H 70" stroke="#DC2626" strokeWidth="10" strokeLinecap="round" />
+                  </svg>
+                </div>
                 <div>
                    <h2 className="font-serif text-3xl font-bold leading-none">United Baptist</h2>
                    <span className="text-church-gold text-xs font-bold tracking-[0.2em] uppercase">Church, Jos</span>
                 </div>
              </div>
-
              <p className="text-gray-400 text-lg leading-relaxed max-w-sm mb-10">
-               Sanctuary of Extra Ordinary Miracles. Cultivating a community of grace, truth, and profound spiritual depth.
+               Sanctuary of Extra Ordinary Miracles.<br/>
+               <span className="text-sm font-bold uppercase tracking-widest text-church-cyan mt-2 block">Since Jan. 2nd, 1966</span>
              </p>
-             <div className="flex space-x-4">
-              {[Facebook, Instagram, Youtube].map((Icon, i) => (
-                <a key={i} href="#" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-church-gold hover:border-church-gold hover:text-church-primary transition-all duration-300">
-                  <Icon size={20} />
-                </a>
-              ))}
-            </div>
+             <div className="flex gap-6">
+                <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white hover:text-church-primary transition-all"><Facebook size={16} /></a>
+                <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white hover:text-church-primary transition-all"><Instagram size={16} /></a>
+                <a href="#" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white hover:text-church-primary transition-all"><Youtube size={16} /></a>
+             </div>
           </div>
-
           <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
                <h4 className="text-church-cyan font-bold text-xs uppercase tracking-widest mb-8">Gathering</h4>
-               <ul className="space-y-6">
-                 <li>
-                   <span className="block text-white font-serif text-xl mb-1">Sundays</span>
-                   <span className="text-gray-400">9:00 AM & 11:00 AM</span>
-                 </li>
-                 <li>
-                   <span className="block text-white font-serif text-xl mb-1">Wednesdays</span>
-                   <span className="text-gray-400">5:00 PM Prayer</span>
-                 </li>
-               </ul>
+               <p className="text-white font-serif text-xl mb-1">Sundays</p>
+               <p className="text-gray-400">9:00 AM & 11:00 AM</p>
             </div>
-
             <div>
                <h4 className="text-church-cyan font-bold text-xs uppercase tracking-widest mb-8">Location</h4>
-               <address className="not-italic text-gray-300 space-y-4 leading-relaxed">
-                 <p className="font-serif text-xl text-white">Main Sanctuary</p>
-                 <p>39/37 Tafawa Balewa Street<br />Jos, Nigeria</p>
-                 <p className="flex items-center gap-2 mt-4 text-white">
-                   <Phone size={16} className="text-church-gold" /> (555) 123-4567
-                 </p>
-               </address>
+               <p className="font-serif text-xl text-white">Main Sanctuary</p>
+               <p className="text-gray-400">39/37 Tafawa Balewa Street<br />Jos, Nigeria</p>
             </div>
-
             <div>
-               <h4 className="text-church-cyan font-bold text-xs uppercase tracking-widest mb-8">Explore</h4>
-               <ul className="space-y-4">
-                 {navItems.flatMap(item => item.children ? item.children : item).filter(item => item.path !== '/').slice(0, 6).map(item => (
-                   <li key={item.path}>
-                     <Link to={item.path!} className="text-gray-300 hover:text-church-gold hover:translate-x-2 transition-all inline-flex items-center gap-2">
-                       {item.label}
-                     </Link>
-                   </li>
-                 ))}
-               </ul>
+               <h4 className="text-church-cyan font-bold text-xs uppercase tracking-widest mb-8">Support</h4>
+               <Link to="/give" className="text-church-gold hover:text-white transition-colors flex items-center gap-2 font-bold tracking-widest text-[10px] uppercase">Online Giving <Heart size={14} /></Link>
             </div>
           </div>
         </div>
-
-        <div className="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 font-bold tracking-widest uppercase">
-          <p>&copy; {new Date().getFullYear()} United Baptist Church.</p>
+        <div className="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+          <p>&copy; {new Date().getFullYear()} United Baptist Church, Jos. All Rights Reserved.</p>
           <div className="flex space-x-8 mt-6 md:mt-0">
-            <a href="#" className="hover:text-church-gold transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-church-gold transition-colors">Terms of Use</a>
+            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms</a>
           </div>
         </div>
       </div>
@@ -516,15 +279,11 @@ const Footer: React.FC = () => {
   );
 };
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col font-sans text-church-primary bg-church-cream selection:bg-church-gold selection:text-church-primary">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow w-full">
         {children}
       </main>
       <GeminiAssistant />

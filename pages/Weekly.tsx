@@ -1,9 +1,38 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { weeklyUpdate, eventsData } from '../data';
-import { Play, Download, Calendar as CalendarIcon, ArrowRight, Bell } from 'lucide-react';
+import { Play, Download, Calendar as CalendarIcon, ArrowRight, Bell, Loader2 } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { supabase } from '../lib/supabaseClient';
+import { WeeklyUpdate } from '../types';
 
 const Weekly: React.FC = () => {
+  const [update, setUpdate] = useState<WeeklyUpdate>(weeklyUpdate);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUpdate = async () => {
+       if (supabase) {
+          const { data, error } = await supabase
+            .from('weekly_updates')
+            .select('*')
+            .order('date', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (data && !error) {
+             setUpdate(data as unknown as WeeklyUpdate);
+          }
+       }
+       setLoading(false);
+    };
+    fetchUpdate();
+  }, []);
+
+  if (loading) {
+     return <div className="min-h-screen bg-[#fbfaf8] flex items-center justify-center"><Loader2 className="animate-spin text-church-primary" size={32} /></div>;
+  }
+
   return (
     <div className="pt-32 pb-20 bg-[#fbfaf8] min-h-screen">
       
@@ -11,7 +40,7 @@ const Weekly: React.FC = () => {
       <div className="container mx-auto px-6 mb-16 text-center max-w-4xl">
          <span className="text-church-gold font-bold text-xs tracking-[0.2em] uppercase mb-4 block">This Week</span>
          <h1 className="font-serif text-5xl md:text-7xl text-church-primary mb-6">Weekly Update</h1>
-         <p className="text-xl text-gray-400 font-light">{weeklyUpdate.date}</p>
+         <p className="text-xl text-gray-400 font-light">{update.date}</p>
       </div>
 
       <div className="container mx-auto px-6 max-w-6xl">
@@ -24,8 +53,8 @@ const Weekly: React.FC = () => {
                <div className="bg-white p-4 rounded-[2.5rem] shadow-xl border border-gray-100 mb-12">
                   <div className="aspect-video w-full bg-black rounded-[2rem] overflow-hidden relative group cursor-pointer">
                      <video 
-                        src={weeklyUpdate.videoUrl}
-                        poster={weeklyUpdate.thumbnail}
+                        src={update.videoUrl}
+                        poster={update.thumbnail}
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                         controls
                      />
@@ -36,8 +65,8 @@ const Weekly: React.FC = () => {
                      </div>
                   </div>
                   <div className="p-6">
-                     <h2 className="font-serif text-3xl text-church-primary mb-2">{weeklyUpdate.title}</h2>
-                     <p className="text-gray-500 leading-relaxed">{weeklyUpdate.description}</p>
+                     <h2 className="font-serif text-3xl text-church-primary mb-2">{update.title}</h2>
+                     <p className="text-gray-500 leading-relaxed">{update.description}</p>
                   </div>
                </div>
 
@@ -47,7 +76,7 @@ const Weekly: React.FC = () => {
                      <Bell className="text-church-gold" size={24} /> News & Updates
                   </h3>
                   <div className="space-y-10">
-                     {weeklyUpdate.highlights.map((item, idx) => (
+                     {update.highlights && update.highlights.map((item, idx) => (
                         <div key={idx} className="flex gap-6 group">
                            <div className="w-12 h-12 rounded-2xl bg-white border border-church-primary/10 flex items-center justify-center text-church-primary font-serif font-bold text-lg shadow-sm group-hover:scale-110 transition-transform flex-shrink-0">
                               {idx + 1}

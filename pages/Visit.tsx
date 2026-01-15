@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Clock, MapPin, Coffee, Music, Baby, HelpCircle, ArrowRight, Heart } from 'lucide-react';
 
@@ -99,7 +98,7 @@ const Visit: React.FC = () => {
                </div>
                <h3 className="font-serif text-3xl mb-4 relative z-10">Location</h3>
                <p className="text-white/70 leading-relaxed mb-8 relative z-10">
-                  123 Faith Avenue, Jos, Nigeria.<br/>
+                  39/37 Tafawa Balewa Street, Jos, Nigeria.<br/>
                   Our campus is wheelchair accessible and we have a dedicated team to assist with any special needs.
                </p>
                <a href="#" className="mt-auto flex items-center gap-2 text-church-gold font-bold uppercase tracking-widest text-xs border-b border-church-gold pb-1 relative z-10">

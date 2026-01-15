@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, Play, Clock, MapPin, Calendar, Heart, Music, Users, Star } from 'lucide-react';
@@ -127,7 +126,7 @@ const Home: React.FC = () => {
                            <MapPin className="text-church-cyan" size={18} />
                            <h4 className="font-bold text-lg text-church-primary">Location</h4>
                         </div>
-                        <p className="text-gray-500 pl-8">123 Faith Avenue, Jos</p>
+                        <p className="text-gray-500 pl-8">39/37 Tafawa Balewa Street, Jos</p>
                         <a href="#" className="text-church-cyan text-[10px] font-bold uppercase tracking-widest pl-8 mt-1 inline-block border-b border-church-cyan pb-0.5">Get Directions</a>
                       </div>
 

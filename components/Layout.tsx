@@ -125,7 +125,7 @@ const Header: React.FC = () => {
                 <Clock size={12} className="text-church-gold" /> Sundays 9:00 AM & 11:00 AM
               </span>
               <span className="hidden md:flex items-center gap-2 text-white/90">
-                <MapPin size={12} className="text-church-gold" /> 123 Faith Avenue, Jos
+                <MapPin size={12} className="text-church-gold" /> 39/37 Tafawa Balewa Street, Jos
               </span>
            </div>
            <div className="flex items-center gap-6">
@@ -482,7 +482,7 @@ const Footer: React.FC = () => {
                <h4 className="text-church-cyan font-bold text-xs uppercase tracking-widest mb-8">Location</h4>
                <address className="not-italic text-gray-300 space-y-4 leading-relaxed">
                  <p className="font-serif text-xl text-white">Main Sanctuary</p>
-                 <p>123 Faith Avenue<br />Jos, Nigeria</p>
+                 <p>39/37 Tafawa Balewa Street<br />Jos, Nigeria</p>
                  <p className="flex items-center gap-2 mt-4 text-white">
                    <Phone size={16} className="text-church-gold" /> (555) 123-4567
                  </p>

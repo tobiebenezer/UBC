@@ -71,7 +71,7 @@ const GeminiAssistant: React.FC = () => {
         
         Key Information:
         - Sunday Services: 9:00 AM (Traditional Hymns), 11:00 AM (Contemporary Worship).
-        - Location: 123 Faith Avenue, Jos, Nigeria.
+        - Location: 39/37 Tafawa Balewa Street, Jos, Nigeria.
         - Senior Pastor: Rev. Dr. Elizabeth Sterling.
         - Mission: To foster a community of grace, truth, and profound spiritual depth.
         

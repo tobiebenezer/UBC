@@ -35,13 +35,13 @@ const Visit: React.FC = () => {
 
       <section className="container mx-auto px-6 mb-24 max-w-7xl">
          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white p-12 rounded-[3rem] shadow-xl border border-gray-100 flex flex-col items-start hover:-translate-y-2 transition-transform duration-500">
+            <div className="bg-white p-12 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-start hover:-translate-y-2 transition-transform duration-500">
                <div className="w-14 h-14 bg-church-cream rounded-2xl flex items-center justify-center text-church-gold mb-8"><Baby size={28} /></div>
                <h3 className="font-serif text-3xl text-church-primary mb-4">For Families</h3>
                <p className="text-gray-500 leading-relaxed mb-8">We take the safety of your children seriously. All volunteers are background checked. We use a secure tag system for check-in.</p>
                <button className="mt-auto flex items-center gap-2 text-church-cyan font-bold uppercase tracking-widest text-xs border-b border-church-cyan pb-1">Pre-register Kids <ArrowRight size={14} /></button>
             </div>
-            <div className="bg-church-primary p-12 rounded-[3rem] shadow-xl text-white flex flex-col items-start hover:-translate-y-2 transition-transform duration-500 relative overflow-hidden">
+            <div className="bg-church-primary p-12 rounded-2xl shadow-lg text-white flex flex-col items-start hover:-translate-y-2 transition-transform duration-500 relative overflow-hidden">
                <div className="absolute top-0 right-0 w-64 h-64 bg-church-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-church-gold mb-8"><MapPin size={28} /></div>
                <h3 className="font-serif text-3xl mb-4 relative z-10">Location</h3>

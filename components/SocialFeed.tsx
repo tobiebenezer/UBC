@@ -163,7 +163,7 @@ const SocialFeed: React.FC = () => {
                href={post.link}
                target="_blank"
                rel="noopener noreferrer"
-               className="flex-shrink-0 w-[350px] bg-white rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl border border-white/50 snap-center transition-all duration-300 hover:-translate-y-2 group flex flex-col cursor-pointer"
+               className="flex-shrink-0 w-[350px] bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl border border-white/50 snap-center transition-all duration-300 hover:-translate-y-2 group flex flex-col cursor-pointer"
             >
                {/* Header */}
                <div className="flex items-center justify-between p-6 pb-4">
@@ -222,7 +222,7 @@ const SocialFeed: React.FC = () => {
          ))}
          
          {/* End Card CTA */}
-         <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-80 bg-church-primary rounded-[2rem] p-10 flex flex-col justify-center items-center text-center text-white snap-center shadow-2xl relative overflow-hidden group cursor-pointer">
+         <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="flex-shrink-0 w-80 bg-church-primary rounded-xl p-10 flex flex-col justify-center items-center text-center text-white snap-center shadow-lg relative overflow-hidden group cursor-pointer">
              <div className="absolute top-0 right-0 w-48 h-48 bg-church-gold/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-church-gold/30 transition-colors duration-700"></div>
              
              <div className="relative z-10 flex flex-col items-center">
@@ -243,7 +243,7 @@ const SocialFeed: React.FC = () => {
       {/* Add Post Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-6">
-            <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in-up">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-lg overflow-hidden animate-fade-in-up">
                 <div className="bg-church-primary p-6 text-white flex justify-between items-center">
                     <h3 className="font-serif text-xl">New Social Post</h3>
                     <button onClick={() => setIsModalOpen(false)} className="hover:text-church-gold"><X size={20} /></button>

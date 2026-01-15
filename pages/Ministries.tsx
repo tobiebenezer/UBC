@@ -23,7 +23,7 @@ const Ministries: React.FC = () => {
                     
                     {/* Image Side */}
                     <div className="w-full lg:w-1/2 relative">
-                       <div className="aspect-[4/3] rounded-[3rem] overflow-hidden shadow-2xl relative z-10">
+                       <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg relative z-10">
                           <img 
                              src={ministry.image} 
                              alt={ministry.title} 

@@ -93,7 +93,7 @@ const Groups: React.FC = () => {
          {filteredGroups.length > 0 ? (
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredGroups.map(group => (
-                 <div key={group.id} className="group bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col h-full">
+                 <div key={group.id} className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-500 flex flex-col h-full">
                     <div className="h-64 relative overflow-hidden">
                        <img 
                          src={group.image} 
@@ -136,7 +136,7 @@ const Groups: React.FC = () => {
               ))}
            </div>
          ) : (
-           <div className="text-center py-20 bg-white rounded-[3rem] border border-dashed border-gray-200">
+           <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
               <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                  <Search className="text-gray-300" size={32} />
               </div>

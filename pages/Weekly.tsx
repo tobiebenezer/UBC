@@ -50,7 +50,7 @@ const Weekly: React.FC = () => {
             <div className="lg:col-span-2">
                
                {/* Video Player Card */}
-               <div className="bg-white p-4 rounded-[2.5rem] shadow-xl border border-gray-100 mb-12">
+               <div className="bg-white p-4 rounded-2xl shadow-lg border border-gray-100 mb-12">
                   <div className="aspect-video w-full bg-black rounded-[2rem] overflow-hidden relative group cursor-pointer">
                      <video 
                         src={update.videoUrl}
@@ -71,7 +71,7 @@ const Weekly: React.FC = () => {
                </div>
 
                {/* Highlights Bulletin */}
-               <div className="bg-church-cream rounded-[2.5rem] p-10 md:p-14 border border-church-primary/5">
+               <div className="bg-church-cream rounded-2xl p-10 md:p-14 border border-church-primary/5">
                   <h3 className="font-serif text-2xl text-church-primary mb-10 flex items-center gap-3">
                      <Bell className="text-church-gold" size={24} /> News & Updates
                   </h3>
@@ -102,7 +102,7 @@ const Weekly: React.FC = () => {
             <div className="space-y-8">
                
                {/* Week at a Glance */}
-               <div className="bg-white p-8 rounded-[2.5rem] shadow-lg border border-gray-100">
+               <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-100">
                   <div className="flex items-center justify-between mb-8">
                      <h3 className="font-serif text-xl text-church-primary">Week at a Glance</h3>
                      <Link to="/events" className="text-xs font-bold text-church-gold uppercase tracking-widest hover:text-church-primary">Full Calendar</Link>
@@ -153,7 +153,7 @@ const Weekly: React.FC = () => {
                </div>
 
                {/* Featured Ministry Promo */}
-               <div className="bg-church-primary rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
+               <div className="bg-church-primary rounded-2xl p-10 text-white relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-40 h-40 bg-church-gold/20 rounded-full blur-2xl transform translate-x-10 -translate-y-10"></div>
                   <h3 className="font-serif text-2xl mb-4 relative z-10">Get Connected</h3>
                   <p className="text-white/70 text-sm mb-8 leading-relaxed relative z-10">

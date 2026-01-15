@@ -58,7 +58,7 @@ const Volunteer: React.FC = () => {
              <button 
                key={team.id}
                onClick={() => setSelectedTeam(team.id)}
-               className={`text-left p-10 rounded-[3rem] transition-all duration-500 relative overflow-hidden group h-full flex flex-col ${
+               className={`text-left p-10 rounded-2xl transition-all duration-500 relative overflow-hidden group h-full flex flex-col ${
                  selectedTeam === team.id 
                  ? 'bg-church-primary text-white shadow-2xl scale-105 z-10' 
                  : 'bg-white text-church-primary border border-gray-100 hover:border-church-gold/30 hover:shadow-xl'
@@ -92,7 +92,7 @@ const Volunteer: React.FC = () => {
 
       {/* Application Section */}
       <section id="apply" className="container mx-auto px-6 max-w-3xl">
-         <div className="bg-white p-12 md:p-16 rounded-[3rem] shadow-2xl border border-gray-100 relative">
+         <div className="bg-white p-12 md:p-16 rounded-2xl shadow-lg border border-gray-100 relative">
             {!submitted ? (
               <form onSubmit={handleSubmit} className="space-y-10 animate-fade-in-up">
                  <div className="text-center">

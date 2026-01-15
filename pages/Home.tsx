@@ -73,7 +73,7 @@ const Home: React.FC = () => {
                 </div>
              </div>
              <div className="lg:col-span-5 relative lg:-ml-24 mt-8 lg:mt-0">
-                <div className="bg-white p-10 md:p-14 rounded-[3rem] shadow-xl border border-gray-100">
+                <div className="bg-white p-10 md:p-14 rounded-2xl shadow-lg border border-gray-100">
                     <span className="text-church-gold font-bold uppercase tracking-widest text-xs mb-4 block">Weekly Gathering</span>
                     <h3 className="font-serif text-4xl md:text-5xl mb-8 text-church-primary">Join us this <span className="italic text-church-cyan">Sunday.</span></h3>
                     <div className="space-y-8 divide-y divide-gray-100">
@@ -96,10 +96,10 @@ const Home: React.FC = () => {
       <section className="py-24 px-6 bg-church-primary text-white">
         <div className="container mx-auto">
           <div className="flex justify-between items-end mb-12 border-b border-white/10 pb-8">
-             <div><span className="text-church-cyan font-bold text-xs uppercase tracking-widest mb-4 block">Latest Message</span><h2 className="font-serif text-4xl md:text-5xl">Digital Ministry</h2></div>
+             <div><span className="text-church-cyan font-bold text-xs uppercase tracking-widest mb-4 block">Latest Message</span><h2 className="font-serif text-4xl md:text-5xl">Recent Sermons</h2></div>
              <Link to="/sermons" className="hidden md:flex items-center text-church-gold font-bold uppercase tracking-widest text-xs">Full Library <ArrowRight size={14} className="ml-2" /></Link>
           </div>
-          <Link to={`/sermons/${latestSermon.id}`} className="block relative h-[400px] md:h-[600px] rounded-[3rem] overflow-hidden group">
+          <Link to={`/sermons/${latestSermon.id}`} className="block relative h-[400px] md:h-[600px] rounded-2xl overflow-hidden group">
              <img src={latestSermon.image} className="w-full h-full object-cover opacity-60 transition-transform duration-1000 group-hover:scale-105" alt="Message" />
              <div className="absolute inset-0 bg-gradient-to-r from-church-primary via-church-primary/80 to-transparent"></div>
              <div className="relative z-10 p-10 md:p-20 flex flex-col justify-center h-full">

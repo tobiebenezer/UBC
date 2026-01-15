@@ -13,7 +13,7 @@ const Prayer: React.FC = () => {
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fbfaf8] px-6">
-        <div className="bg-white p-12 rounded-[3rem] shadow-xl text-center max-w-lg border border-church-gold/20">
+        <div className="bg-white p-12 rounded-2xl shadow-lg text-center max-w-lg border border-church-gold/20">
           <div className="w-20 h-20 bg-church-primary text-church-gold rounded-full flex items-center justify-center mx-auto mb-8 animate-fade-in-up">
             <Send size={32} />
           </div>
@@ -43,7 +43,7 @@ const Prayer: React.FC = () => {
            </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-8 md:p-12 rounded-[3rem] shadow-xl border border-gray-50">
+        <form onSubmit={handleSubmit} className="bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-gray-50">
            
            <div className="flex gap-4 mb-8 bg-gray-50 p-2 rounded-full w-fit mx-auto">
               <button

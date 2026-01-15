@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from '@tanstack/react-router';
 import { 
   Play, Download, Share2, BookOpen, MessageCircle, FileText, 
-  Calendar, User, Check
+  Calendar, User, Check, ArrowLeft
 } from 'lucide-react';
 import { sermonsData } from '../data';
 
@@ -35,9 +35,19 @@ const SermonDetail: React.FC = () => {
     <div className="bg-[#fbfaf8] min-h-screen pt-24 pb-20">
       
       {/* Cinema Player Section - YouTube Integration */}
-      <div className="w-full bg-black shadow-2xl">
+      <div className="w-full bg-black shadow-2xl relative group">
+        
+        {/* Breadcrumb Overlay (Fade out on Play) */}
+        {!isPlaying && (
+           <div className="absolute top-6 left-6 z-30">
+              <Link to="/sermons" className="inline-flex items-center gap-2 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-white/80 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors border border-white/10">
+                 <ArrowLeft size={14} /> Library
+              </Link>
+           </div>
+        )}
+
         <div className="container mx-auto px-0 md:px-6 py-6 md:py-12">
-           <div className="aspect-video w-full bg-black rounded-none md:rounded-[2rem] overflow-hidden relative shadow-2xl border border-white/10 group">
+           <div className="aspect-video w-full bg-black rounded-none md:rounded-[2rem] overflow-hidden relative shadow-2xl border border-white/10 group-player">
              
              {!isPlaying ? (
                // Cover Image State

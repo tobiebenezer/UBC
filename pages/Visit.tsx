@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Clock, MapPin, Coffee, Music, Baby, HelpCircle, ArrowRight, Heart } from 'lucide-react';
 
@@ -21,35 +22,35 @@ const Visit: React.FC = () => {
 
       {/* Visual Timeline - Organic */}
       <section className="container mx-auto px-6 mb-32 max-w-5xl relative">
-        {/* Connecting Line (Gold Path) */}
-        <div className="absolute left-[2.25rem] md:left-1/2 top-0 bottom-0 w-1 bg-church-gold/20 rounded-full"></div>
+        {/* Connecting Line (Gold Path) - Corrected for Mobile */}
+        <div className="absolute left-[2rem] md:left-1/2 top-0 bottom-0 w-1 bg-church-gold/20 rounded-full"></div>
         
         <div className="space-y-24">
            {/* Step 1 */}
            <div className="relative flex flex-col md:flex-row gap-8 md:gap-16 items-center">
-              <div className="md:w-1/2 md:text-right order-2 md:order-1">
+              <div className="md:w-1/2 md:text-right order-2 md:order-1 pl-16 md:pl-0">
                  <h3 className="font-serif text-3xl text-church-primary mb-4">Arrive & Park</h3>
                  <p className="text-gray-500 leading-relaxed">
                     Turn your hazard lights on as you enter the lot. Our parking team will direct you to a VIP spot reserved just for first-time guests, right near the entrance.
                  </p>
               </div>
-              <div className="absolute left-0 md:left-1/2 -translate-x-1/2 w-16 h-16 bg-white border-4 border-church-gold rounded-full flex items-center justify-center text-church-primary shadow-lg z-10 order-1 md:order-2">
+              <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-16 h-16 bg-white border-4 border-church-gold rounded-full flex items-center justify-center text-church-primary shadow-lg z-10 order-1 md:order-2">
                  <span className="font-serif text-2xl font-bold">1</span>
               </div>
-              <div className="md:w-1/2 pl-20 md:pl-0 order-3">
+              <div className="md:w-1/2 pl-16 md:pl-0 order-3">
                  <div className="text-church-gold font-bold text-sm uppercase tracking-widest">8:45 AM</div>
               </div>
            </div>
 
            {/* Step 2 */}
            <div className="relative flex flex-col md:flex-row gap-8 md:gap-16 items-center">
-              <div className="md:w-1/2 order-3 md:order-1 pl-20 md:pl-0 md:text-right">
+              <div className="md:w-1/2 order-3 md:order-1 pl-16 md:pl-0 md:text-right">
                  <div className="text-church-gold font-bold text-sm uppercase tracking-widest">9:00 AM</div>
               </div>
-              <div className="absolute left-0 md:left-1/2 -translate-x-1/2 w-16 h-16 bg-white border-4 border-church-gold rounded-full flex items-center justify-center text-church-primary shadow-lg z-10 order-1 md:order-2">
+              <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-16 h-16 bg-white border-4 border-church-gold rounded-full flex items-center justify-center text-church-primary shadow-lg z-10 order-1 md:order-2">
                  <span className="font-serif text-2xl font-bold">2</span>
               </div>
-              <div className="md:w-1/2 order-2 md:order-3">
+              <div className="md:w-1/2 order-2 md:order-3 pl-16 md:pl-0">
                  <h3 className="font-serif text-3xl text-church-primary mb-4">Coffee & Kids</h3>
                  <p className="text-gray-500 leading-relaxed">
                     Grab a free latte in the atrium. If you have children, our check-in team will help you register them for Grace Kids—a secure, fun environment for ages 0-10.
@@ -59,16 +60,16 @@ const Visit: React.FC = () => {
 
            {/* Step 3 */}
            <div className="relative flex flex-col md:flex-row gap-8 md:gap-16 items-center">
-              <div className="md:w-1/2 md:text-right order-2 md:order-1">
+              <div className="md:w-1/2 md:text-right order-2 md:order-1 pl-16 md:pl-0">
                  <h3 className="font-serif text-3xl text-church-primary mb-4">Worship</h3>
                  <p className="text-gray-500 leading-relaxed">
                     Our service lasts about 75 minutes. We sing, we pray, and we open the Bible. No pressure to give, no pressure to perform. Just come as you are.
                  </p>
               </div>
-              <div className="absolute left-0 md:left-1/2 -translate-x-1/2 w-16 h-16 bg-white border-4 border-church-gold rounded-full flex items-center justify-center text-church-primary shadow-lg z-10 order-1 md:order-2">
+              <div className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-16 h-16 bg-white border-4 border-church-gold rounded-full flex items-center justify-center text-church-primary shadow-lg z-10 order-1 md:order-2">
                  <span className="font-serif text-2xl font-bold">3</span>
               </div>
-              <div className="md:w-1/2 pl-20 md:pl-0 order-3">
+              <div className="md:w-1/2 pl-16 md:pl-0 order-3">
                  <div className="text-church-gold font-bold text-sm uppercase tracking-widest">9:15 AM</div>
               </div>
            </div>

@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router';
-import { Menu, X, Facebook, Instagram, Youtube, Phone, User, LogOut, LayoutDashboard, Settings, ChevronDown, Clock, MapPin, Heart } from 'lucide-react';
+import { Menu, X, Facebook, Instagram, Youtube, Phone, User, LogOut, LayoutDashboard, Settings, ChevronDown, Clock, MapPin, Heart, Search } from 'lucide-react';
 import { NavItem } from '../types';
 import GeminiAssistant from './GeminiAssistant';
+import SearchOverlay from './SearchOverlay';
 
 const navItems: NavItem[] = [
   { label: 'Home', path: '/' },
@@ -34,6 +34,7 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -42,21 +43,16 @@ const Header: React.FC = () => {
   const hasDarkHero = () => {
     const p = location.pathname;
     
-    // Pages with confirmed Dark Hero sections
     if (p === '/' || p === '/sermons' || p === '/groups' || p === '/about') return true;
     
-    // Dynamic Routes that have Image Headers
     if (p.startsWith('/ministries/')) return true;
-    if (p.startsWith('/events/')) return true; // Event Detail has dark blurred bg
-    if (p.startsWith('/sermons/')) return false; // Sermon Detail is Light (video player is distinct)
+    if (p.startsWith('/events/')) return true; 
+    if (p.startsWith('/sermons/')) return false; 
     
     return false;
   };
 
-  // Helper to determine if we should force the "Scrolled/Filled" look
-  // (Useful for pages like 'Give' with complex split backgrounds)
   const forceFilledHeader = () => {
-    // Sermon Detail needs filled header because of the video player margin
     if (location.pathname.startsWith('/sermons/')) return true;
     if (location.pathname === '/give') return true;
     return false;
@@ -97,33 +93,24 @@ const Header: React.FC = () => {
     navigate({ to: '/' });
   };
 
-  // Determine Text Color State
   const isFilledState = isScrolled || forceFilledHeader();
   
-  // Logic: 
-  // 1. If mobile menu open -> White
-  // 2. If filled state (scrolled) -> Dark (on white blur) 
-  //    UNLESS we want to keep it dark mode... but standard convention is white bg/dark text on scroll
-  // 3. If transparent (top) and has Dark Hero -> White
-  // 4. If transparent (top) and Light Hero -> Dark
-
   let isDarkText = false;
 
   if (isMobileMenuOpen) {
-    isDarkText = false; // Always white in mobile menu
+    isDarkText = false; 
   } else if (isFilledState) {
-    // When scrolled, we usually have a white/blur bar, so text should be dark
-    isDarkText = false; // Wait, sticking to White Text on Navy Pill for Classy Look?
-    // Let's check the implementation below...
-    // The filled state bg is: bg-church-primary/95 (Navy). So text must be WHITE.
     isDarkText = false; 
   } else if (hasDarkHero()) {
-    isDarkText = false; // White text on dark image
+    isDarkText = false; 
   } else {
-    isDarkText = true; // Dark text on light background pages (e.g. Ministries list, Visit)
+    isDarkText = true; 
   }
 
   return (
+    <>
+    <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    
     <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center pointer-events-none">
       
       {/* Top Utility Bar - Fades out on scroll */}
@@ -166,7 +153,6 @@ const Header: React.FC = () => {
         >
           {/* Logo */}
           <Link to="/" className="flex items-center z-50 group flex-shrink-0 mr-4 lg:mr-0">
-             {/* Image Logo - Adapts brightness */}
              <img 
                src="/logo.png" 
                alt="United Baptist Church Logo" 
@@ -177,7 +163,6 @@ const Header: React.FC = () => {
                }}
              />
              
-             {/* Fallback CSS Logo - Adapts border color */}
              <div className="hidden relative w-8 h-10 mr-3 flex-shrink-0">
                 <div className={`absolute inset-0 border-l-[6px] border-r-[6px] border-b-[6px] rounded-b-2xl h-full w-full transition-colors duration-300 ${isDarkText ? 'border-church-primary' : 'border-white'}`}></div>
                 <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[4px] h-5 bg-church-red"></div>
@@ -199,7 +184,6 @@ const Header: React.FC = () => {
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
             {navItems.filter(item => item.path !== '/').map((item, idx) => {
-              // Dropdown Menu Item
               if (item.children) {
                 return (
                   <div key={idx} className="relative group px-1">
@@ -211,7 +195,6 @@ const Header: React.FC = () => {
                        {item.label} <ChevronDown size={10} className="group-hover:rotate-180 transition-transform duration-300 opacity-70" />
                      </button>
                      
-                     {/* Dropdown Content */}
                      <div className="absolute top-full left-1/2 -translate-x-1/2 pt-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-4 pointer-events-none group-hover:pointer-events-auto min-w-[12rem]">
                         <div className="bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] overflow-hidden py-2 border border-white/50 ring-1 ring-black/5">
                            <div className="absolute top-0 left-0 w-full h-1 bg-church-gold"></div>
@@ -230,7 +213,6 @@ const Header: React.FC = () => {
                 );
               }
               
-              // Standard Link Item
               return (
                 <Link 
                   key={item.path} 
@@ -252,6 +234,16 @@ const Header: React.FC = () => {
 
           {/* Action Button / User Profile */}
           <div className="hidden lg:flex items-center gap-3 z-50 flex-shrink-0 ml-4 lg:ml-0">
+             
+             {/* Search Button */}
+             <button 
+                onClick={() => setIsSearchOpen(true)}
+                className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isDarkText ? 'text-church-primary hover:bg-church-cream' : 'text-white hover:bg-white/10'}`}
+                aria-label="Search"
+             >
+                <Search size={18} />
+             </button>
+
              {!isLoggedIn ? (
                <>
                  <Link
@@ -314,17 +306,26 @@ const Header: React.FC = () => {
           </div>
 
           {/* Mobile Menu Toggle */}
-          <button
-            className={`lg:hidden z-50 p-2 transition-colors ${isDarkText ? 'text-church-primary' : 'text-white'}`}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen 
-              ? <X size={24} className="text-white" /> 
-              : <Menu size={24} />
-            } 
-          </button>
+          <div className="flex items-center gap-2 lg:hidden">
+             <button
+               className={`p-2 transition-colors ${isDarkText ? 'text-church-primary' : 'text-white'}`}
+               onClick={() => setIsSearchOpen(true)}
+             >
+                <Search size={24} />
+             </button>
+             <button
+              className={`z-50 p-2 transition-colors ${isDarkText ? 'text-church-primary' : 'text-white'}`}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+             >
+               {isMobileMenuOpen 
+                 ? <X size={24} className="text-white" /> 
+                 : <Menu size={24} />
+               } 
+             </button>
+          </div>
         </div>
       </header>
+    </div>
 
       {/* Mobile Nav Overlay - Premium Dark Glassmorphism */}
       <div
@@ -408,7 +409,7 @@ const Header: React.FC = () => {
           </button>
         )}
       </div>
-    </div>
+    </>
   );
 };
 
